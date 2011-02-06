@@ -20,7 +20,7 @@ module Rack
       elsif ssl_request?(env)
         status, headers, body = @app.call(env)
         flag_cookies_as_secure!(headers)
-        set_hsts_headers!(headers)
+        set_hsts_headers!(headers) unless @options[:strict] || @options[:mixed]
         [status, headers, body]
       else
         @app.call(env)
@@ -30,10 +30,7 @@ module Rack
   private
   
     def enforcement_non_ssl?(env)
-      return true if @options[:strict]
-      unless (env['REQUEST_METHOD'] == 'PUT' || env['REQUEST_METHOD'] == 'POST')
-        @options[:mixed] if @options[:mixed]
-      end
+      true if @options[:strict] || @options[:mixed] && !(env['REQUEST_METHOD'] == 'PUT' || env['REQUEST_METHOD'] == 'POST')
     end
     
     def ssl_request?(env)
