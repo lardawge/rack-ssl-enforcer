@@ -48,14 +48,14 @@ class TestRackSslEnforcer < Test::Unit::TestCase
       assert_equal ["id=1; path=/; secure", "token=abc; path=/; secure; HttpOnly"], last_response.headers['Set-Cookie'].split("\n")
     end
     
-    should 'set default hsts headers to all ssl requests' do
+    should 'not set default hsts headers to all ssl requests' do
       get 'https://www.example.org/'
-      assert_equal "max-age=31536000; includeSubDomains", last_response.headers["Strict-Transport-Security"] 
+      assert !last_response.headers["Strict-Transport-Security"]
     end
-    
+
     should 'not set hsts headers to non ssl requests' do
       get 'http://www.example.org/'
-      assert last_response.headers["Strict-Transport-Security"].nil? 
+      assert !last_response.headers["Strict-Transport-Security"]
     end
   end
   
@@ -233,6 +233,29 @@ class TestRackSslEnforcer < Test::Unit::TestCase
     should 'not include subdomains' do
       get 'https://www.example.org/'
       assert !last_response.headers["Strict-Transport-Security"].include?("includeSubDomains")
+    end
+  end
+
+  context 'that has :hsts options set' do
+    setup { mock_app :hsts => { :expires => '500', :subdomains => false } }
+
+    should 'set expiry option' do
+      get 'https://www.example.org/'
+      assert_equal "max-age=500", last_response.headers["Strict-Transport-Security"]
+    end
+
+    should 'not include subdomains' do
+      get 'https://www.example.org/'
+      assert !last_response.headers["Strict-Transport-Security"].include?("includeSubDomains")
+    end
+  end
+
+  context 'that has force_secure_cookie option set to false' do
+    setup { mock_app :force_secure_cookies => false }
+    
+    should 'not secure cookies' do
+      get 'https://www.example.org/users/123/edit'
+      assert_equal ["id=1; path=/", "token=abc; path=/; secure; HttpOnly"], last_response.headers['Set-Cookie'].split("\n")
     end
   end
   
