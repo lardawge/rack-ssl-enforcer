@@ -175,6 +175,24 @@ class TestRackSslEnforcer < Test::Unit::TestCase
       assert_equal 'http://www.example.org/foo/', last_response.location
     end
     
+    should 'respond from allowed https url to POST' do
+      post 'https://www.example.org/users'
+      assert_equal 200, last_response.status
+      assert_equal 'Hello world!', last_response.body
+    end
+
+    should 'respond from allowed https url to PUT' do
+      put 'https://www.example.org/users'
+      assert_equal 200, last_response.status
+      assert_equal 'Hello world!', last_response.body
+    end
+
+    should 'respond from allowed https url to DELETE' do
+      delete 'https://www.example.org/users/123'
+      assert_equal 200, last_response.status
+      assert_equal 'Hello world!', last_response.body
+    end
+
     should 'respond from allowed https url' do
       get 'https://www.example.org/users/123/edit'
       assert_equal 200, last_response.status

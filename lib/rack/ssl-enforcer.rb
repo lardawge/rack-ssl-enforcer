@@ -18,7 +18,7 @@ module Rack
 
       if enforce_ssl?(env)
         scheme = 'https' unless ssl_request?(env)
-      elsif ssl_request?(env) && (@options[:strict] || enforce_non_ssl?(env))
+      elsif ssl_request?(env) && enforce_non_ssl?(env)
         scheme = 'http'
       end
 
@@ -39,7 +39,7 @@ module Rack
   private
 
     def enforce_non_ssl?(env)
-      @options[:mixed] && !%w[POST PUT].include?(env['REQUEST_METHOD'])
+      @options[:strict] || @options[:mixed] && !%w[POST PUT DELETE].include?(env['REQUEST_METHOD'])
     end
 
     def ssl_request?(env)
