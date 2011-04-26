@@ -166,7 +166,7 @@ class TestRackSslEnforcer < Test::Unit::TestCase
     end
   end
   
-  context 'that has array of regex pattern & path as only option with strict option and post option' do
+  context 'that has array of regex pattern with mixed option set to true' do
     setup { mock_app :only => [/^\/users\/(.+)\/edit/], :mixed => true }
     
     should 'respond with a http redirect from non-allowed https url' do
