@@ -20,7 +20,7 @@ module Rack
         scheme = 'https' unless ssl_request?(env)
       elsif ssl_request?(env) && enforce_non_ssl?(env)
         scheme = 'http'
-      end
+      end unless ignore_enforcement?(env)
 
       if scheme
         location = @options[:redirect_to] || replace_scheme(@req, scheme).url
@@ -40,6 +40,10 @@ module Rack
 
     def enforce_non_ssl?(env)
       @options[:strict] || @options[:mixed] && !%w[POST PUT DELETE].include?(env['REQUEST_METHOD'])
+    end
+
+    def ignore_enforcement?(env)
+      check_pattern(@options[:except]) if @options[:except]
     end
 
     def ssl_request?(env)
